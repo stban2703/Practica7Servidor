@@ -10,10 +10,20 @@ import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import main.Main;
+import main.Usuario;
+
 public class ComunicacionTCP extends Thread {
 	private Socket socket;
 	private BufferedReader reader;
 	private BufferedWriter writer;
+	private String line;
+
+	private Main main;
+
+	public ComunicacionTCP(Main main) {
+		this.main = main;
+	}
 
 	// Hilo de recepcion
 	@Override
@@ -70,8 +80,35 @@ public class ComunicacionTCP extends Thread {
 
 	// Recibir mensaje
 	public void recibirMensaje() throws IOException {
-		String line = reader.readLine();
-		System.out.println("<<<" + line);
+		line = reader.readLine();
+		// System.out.println(line);
+
+		main.setArregloRegistro(line.split(","));
+		main.setCorreo(main.getArregloRegistro()[0]);
+		main.setClave(main.getArregloRegistro()[1]);
+
+		String correo = main.getArregloRegistro()[0];
+		String clave = main.getArregloRegistro()[1];
+
+		//Validar correo repetido
+		boolean correoRepetido = false;
+		
+		for (int i = 0; i < main.getUsuariosList().size(); i++) {
+			if ( correo.equals(main.getUsuariosList().get(i).getCorreo()) ) {
+				correoRepetido = true;
+				break;
+			}
+		}
+		
+		if(correoRepetido) {
+			//Mandar mensaje a Android
+			mandarMensaje("REPETIDO");
+			
+		} else {
+			main.getUsuariosList().add(new Usuario(correo, clave));
+			mandarMensaje("OK");
+			
+		}
 
 	}
 
@@ -84,6 +121,14 @@ public class ComunicacionTCP extends Thread {
 			e.printStackTrace();
 		}
 
+	}
+
+	public String getLine() {
+		return line;
+	}
+
+	public void setLine(String line) {
+		this.line = line;
 	}
 
 }
