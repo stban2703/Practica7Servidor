@@ -122,6 +122,9 @@ public class ComunicacionTCP extends Thread {
 		}
 
 	}
+	
+	
+	//Getters y setters
 
 	public String getLine() {
 		return line;
